@@ -19,24 +19,33 @@ const UserSchema = new mongoose.Schema({
         require : true,
         min : 8
     },
+    handle:{
+        type : String,
+        required : true,
+        min: 4 
+    },
     profilePicture: {
         type : String,
         default : ""
     },
     description:{
         type : String,
-        max : 100
+        max : 100,
+        default : ""
     },
     city : {
         type : String,
-        max : 20
+        max : 20,
+        default : ""
     },
     from : {
         type : String,
-        max : 20
+        max : 20,
+        default : ""
     },
     relationshipStatus : {
-        type : Boolean
+        type : Boolean,
+        default : false
     },
     followers: {
         type : Array,

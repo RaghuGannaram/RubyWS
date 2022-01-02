@@ -4,37 +4,39 @@ const bcrypt = require('bcrypt');
 
 
 router.post("/register", async (req, res) => {
-    try { // Hashed the password
+    try { 
+        // Hashed the password
         const salt = await bcrypt.genSalt(5);
         const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
         // Created the user
-        const newUser = new User({username: req.body.username, email: req.body.email, password: hashedPassword})
+        const newUser = new User({username: req.body.username, email: req.body.email, password: hashedPassword, handle:req.body.handle})
 
-        // Saved the user to database and send json response
+        // Saved the user to database and sent json response
         const user = await newUser.save();
         res.status(200).json(user);
 
     } catch (err) {
-        res.status(500).json("Internal server error");
+        res.status(500).json(err);
     }
 })
 
 router.post("/login", async (req, res) => {
-    try { // Query the DB for user email
+    try { 
+        // Query the DB for user email
         const user = await User.findOne({email: req.body.email});
-        ! user && res.status(404).json("User not found");
+        if(!user) return res.status(404).send("User not found");
 
         // Validate the password
         const password = user.password;
         const isValidPass = await bcrypt.compare(req.body.password, password);
-        ! isValidPass && res.status(400).json("Wrong Password")
+        if(!isValidPass) return res.status(400).send("Wrong Password");
 
         // Send the JSON response
         res.status(200).json(user);
 
     } catch (err) {
-        res.status(500).json("Internal server error");
+        res.status(500).json(err);
     }
 })
 
