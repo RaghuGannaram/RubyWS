@@ -40,7 +40,15 @@ router.get("/:postId", async (req, res) => {
   }
 });
 
-
+//get comments for a specific post
+router.get("/:postId/comments", async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.postId);
+    res.status(200).json(post.comments);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 
 //create a post
 router.post("/new", async (req, res) => {
@@ -98,6 +106,17 @@ router.put("/:postId/like", async (req, res) => {
     res.status(500).json(err);
   }
 });
+
+//commnet on a specific post
+router.put("/:postId/comment", async (req, res) => {
+  try{
+    const post = await Post.findById(req.params.postId);
+    await post.updateOne({$push: {comments : req.body.comment}});
+    res.status(200).json("The comment has been added");
+  } catch(err) {
+    res.status(500).json(err);
+  }
+})
 
 
 module.exports = router;
