@@ -6,8 +6,12 @@ const User = require("../models/User");
 //get all the posts
 router.get("/all", async (req, res)=>{
   try {
-    let data= await Post.find()
-    res.status(200).json(data)
+    let posts= await Post.find()
+    const responseData = posts.map(post=>{ 
+      const { comments,...response } = post._doc;
+      return response
+    })
+    res.status(200).json(responseData)
   } catch (err) {
     res.status(500).json(err)
   }
@@ -24,17 +28,38 @@ router.get("/timeline/:userId", async (req, res) => {
         return Post.find({ "author.id": friendId });
       })
     );
-    res.status(200).json(userPosts.concat(...friendPosts))
+    const allPosts = userPosts.concat(...friendPosts);
+    const responseData = allPosts.map(post=>{ 
+      const { comments,...response } = post._doc;
+      return response
+    })
+    res.status(200).json(responseData)
   } catch (err) {
     res.status(500).json(err);
   }
 });
 
+// get list of posts
+router.get("/list/:userId", async (req, res)=>{
+  try {
+    let posts= await Post.find({"author.id" : req.params.userId})
+    const responseData = posts.map(post=>{ 
+      const { comments,...response } = post._doc;
+      return response
+    })
+    res.status(200).json(responseData)
+  } catch (err) {
+    res.status(500).json(err)
+  }
+})
+
+
 //get a specific post
 router.get("/:postId", async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
-    res.status(200).json(post);
+    const {comments, ...postData} = post._doc;
+    res.status(200).json(postData);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -79,9 +104,10 @@ router.put("/:postId", async (req, res) => {
 //delete a post
 router.delete("/:postId", async (req, res) => {
   try {
+    console.log(req.body);
     const post = await Post.findById(req.params.postId);
     if (post.author.id === req.body.userId) {
-      await post.deleteOne();
+      await Post.deleteOne({_id : post._id});
       res.status(200).json("the post has been deleted");
     } else {
       res.status(403).json("you can delete only your post");
@@ -111,7 +137,8 @@ router.put("/:postId/like", async (req, res) => {
 router.put("/:postId/comment", async (req, res) => {
   try{
     const post = await Post.findById(req.params.postId);
-    await post.updateOne({$push: {comments : req.body.comment}});
+    console.log(req.body)
+    await post.updateOne({$push: {comments : req.body}});
     res.status(200).json(post);
   } catch(err) {
     res.status(500).json(err);
