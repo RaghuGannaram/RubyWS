@@ -112,7 +112,7 @@ router.put("/:postId/comment", async (req, res) => {
   try{
     const post = await Post.findById(req.params.postId);
     await post.updateOne({$push: {comments : req.body.comment}});
-    res.status(200).json("The comment has been added");
+    res.status(200).json(post);
   } catch(err) {
     res.status(500).json(err);
   }

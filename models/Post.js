@@ -29,10 +29,40 @@ const PostSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
-    comments: {
-      type: Array,
-      default: [],
-    },
+    comments: [
+      {
+        author:{
+          id: {
+            type: String,
+            required: true,
+          },
+          name:{
+            type: String,
+            required: true,
+          },
+          handle:{
+            type: String,
+            required: true
+          }
+        },
+        description: {
+          type : String,
+          required :true
+        },
+        date: {
+          type : Date,
+          default: Date.now
+        },
+        likes: {
+          type : Array,
+          default : []
+        },
+        hidden: {
+          type : Boolean,
+          default : false
+        }
+      },
+    ],
   },
   { timestamps: true }
 );

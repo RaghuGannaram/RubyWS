@@ -28,6 +28,10 @@ const UserSchema = new mongoose.Schema({
         type : String,
         default : ""
     },
+    backgroundImage: {
+        type : String,
+        default : ""
+    },
     description:{
         type : String,
         max : 100,
