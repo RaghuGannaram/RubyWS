@@ -104,7 +104,6 @@ router.put("/:postId", async (req, res) => {
 //delete a post
 router.delete("/:postId", async (req, res) => {
   try {
-    console.log(req.body);
     const post = await Post.findById(req.params.postId);
     if (post.author.id === req.body.userId) {
       await Post.deleteOne({_id : post._id});
@@ -137,13 +136,57 @@ router.put("/:postId/like", async (req, res) => {
 router.put("/:postId/comment", async (req, res) => {
   try{
     const post = await Post.findById(req.params.postId);
-    console.log(req.body)
     await post.updateOne({$push: {comments : req.body}});
     res.status(200).json(post);
   } catch(err) {
     res.status(500).json(err);
   }
 })
+
+//delete a specific commnet 
+router.delete("/:postId/comment", async (req, res) => {
+  try{
+    const post = await Post.findById(req.params.postId);
+    await post.updateOne({$pull: {comments : {_id : req.body.commentId }}});
+    res.status(200).json(post);
+  } catch(err) {
+    res.status(500).json(err);
+  }
+})
+
+
+//like / dislike a comment
+router.put("/:postId/comment/like", async (req, res) => {
+  try {
+    let liked = false;
+    const {userId,postId, commentId} = req.body;
+    const post = await Post.findById(req.params.postId);
+    post?.comments?.map(comment=>{
+      if(String(comment?._id) === commentId){
+        if(Object.values(comment?.likes).includes(userId)){
+          liked = true;
+        }
+      }
+    })
+    if(!liked){
+      await Post.findOneAndUpdate(
+                { _id : postId},
+                {$push :{'comments.$[comment].likes':userId}},
+                {arrayFilters:[{'comment._id' : commentId}]}
+          )
+      res.status(200).json("The comment has benn liked");
+    } else {
+      await Post.findOneAndUpdate(
+                { _id : postId},
+                {$pull :{'comments.$[comment].likes':userId}},
+                {arrayFilters:[{'comment._id' : commentId}]}
+            )
+      res.status(200).json("The comment has benn disliked");        
+    }
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 
 
 module.exports = router;
