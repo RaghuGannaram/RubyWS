@@ -33,7 +33,8 @@ router.get("/:userId", async (req, res) => {
 router.put("/:userId", async (req, res) => {
   try {
     if (req.body.userId === req.params.userId || req.body.isAdmin) {
-      await User.findByIdAndUpdate(req.body.userId, { $set: req.body});
+      console.log(req.body)
+      await User.findByIdAndUpdate(req.body.userId, { $set: req.body.data});
       res.status(200).json("Account has been updated");
     } else {
       return res.status(403).json("You can update only your account!");
