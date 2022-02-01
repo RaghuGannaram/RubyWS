@@ -32,8 +32,9 @@ router.get("/:userId", async (req, res) => {
 //update user
 router.put("/:userId", async (req, res) => {
   try {
+    console.log("req files :",req.files)
+    console.log("req body :",req.body)
     if (req.body.userId === req.params.userId || req.body.isAdmin) {
-      console.log(req.body)
       await User.findByIdAndUpdate(req.body.userId, { $set: req.body.data});
       res.status(200).json("Account has been updated");
     } else {
