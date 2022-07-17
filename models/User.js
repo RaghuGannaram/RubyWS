@@ -25,12 +25,10 @@ const UserSchema = new mongoose.Schema({
         min: 4 
     },
     profilePicture: {
-        type : String,
-        default : ""
+        type : Buffer
     },
     backgroundImage: {
-        type : String,
-        default : ""
+        type : Buffer
     },
     description:{
         type : String,

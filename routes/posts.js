@@ -132,7 +132,7 @@ router.put("/:postId/like", async (req, res) => {
   }
 });
 
-//commnet on a specific post
+//comment on a specific post
 router.put("/:postId/comment", async (req, res) => {
   try{
     const post = await Post.findById(req.params.postId);
