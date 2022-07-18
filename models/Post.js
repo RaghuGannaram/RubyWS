@@ -2,28 +2,28 @@ const mongoose = require("mongoose");
 
 const PostSchema = new mongoose.Schema(
   {
-    author:{
+    author: {
       id: {
         type: String,
         required: true,
       },
-      name:{
+      name: {
         type: String,
         required: true,
       },
-      handle:{
+      handle: {
         type: String,
-        required: true
+        required: true,
       }
     },
     description: {
       type: String,
       max: 500,
-      required :true
+      required: true,
     },
     img: {
       type: String,
-      default:""
+      default: "",
     },
     likes: {
       type: Array,
@@ -31,36 +31,36 @@ const PostSchema = new mongoose.Schema(
     },
     comments: [
       {
-        author:{
+        author: {
           id: {
             type: String,
             required: true,
           },
-          name:{
+          name: {
             type: String,
             required: true,
           },
-          handle:{
+          handle: {
             type: String,
-            required: true
-          }
+            required: true,
+          },
         },
         description: {
-          type : String,
-          required :true
+          type: String,
+          required: true,
         },
         date: {
-          type : Date,
-          default: Date.now
+          type: Date,
+          default: Date.now,
         },
         likes: {
-          type : Array,
-          default : []
+          type: Array,
+          default: [],
         },
         hidden: {
-          type : Boolean,
-          default : false
-        }
+          type: Boolean,
+          default: false,
+        },
       },
     ],
   },

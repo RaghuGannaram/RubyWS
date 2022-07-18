@@ -3,7 +3,6 @@ const multer = require("multer");
 const User = require("../models/User");
 const path = require("path");
 const fs = require("fs");
-const {Buffer} = require("buffer")
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -34,9 +33,8 @@ router.get("/:userId", async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
     const { adminStatus, password, updatedAt, ...remainingData } = user._doc;
-    let imgBuf = remainingData.profilePicture.toString("base64")
-    remainingData.profilePicture = imgBuf
-    console.log(typeof(remainingData.profilePicture))
+    let imgBase64encoded = remainingData.profilePicture.toString("base64")
+    remainingData.profilePicture = imgBase64encoded;
     res.status(200).json(remainingData);
   } catch (err) {
     res.status(500).json(err);
@@ -46,8 +44,6 @@ router.get("/:userId", async (req, res) => {
 //update user
 router.put("/:userId", upload.single("profilePicture"), async (req, res) => {
   try {
-    console.log("req file :", req.file);
-    console.log("req body :", req.body);
     if (req.body.userId === req.params.userId || req.body.isAdmin) {
       let { userId, ...userData } = req.body;
 
@@ -58,7 +54,6 @@ router.put("/:userId", upload.single("profilePicture"), async (req, res) => {
       if (req.file) {
         userData.profilePicture = fs.readFileSync(path.join(__dirname, "../uploads", req.file.filename));
       }
-      console.log("userData", userData);
       
       await User.findByIdAndUpdate(req.params.userId, {
         $set: { ...userData },
