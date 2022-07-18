@@ -9,7 +9,7 @@ router.get("/all", async (req, res) => {
     const users = await User.find();
 
     const postList = posts.map((post) => {
-      const { comments, ...postData } = post._doc;
+      const { comments, __v,  ...postData } = post._doc;
       let author = users.filter((user) => user._id == postData.author.id);
       postData.profilePicture = author[0]?.profilePicture.toString("base64");
       return postData;
@@ -42,7 +42,7 @@ router.get("/timeline/:userId", async (req, res) => {
 
     console.log("fifth");
     const postList = allPosts.map((post) => {
-      const { comments, ...postData } = post._doc;
+      const { comments, __v, ...postData } = post._doc;
       let author = users.filter((user) => user._id == postData.author.id);
       postData.profilePicture = author[0]?.profilePicture.toString("base64");
       return postData;
@@ -61,7 +61,7 @@ router.get("/list/:userId", async (req, res) => {
     const users = await User.find();
 
     const responseData = posts.map((post) => {
-      const { comments, ...postData } = post._doc;
+      const { comments, __v, ...postData } = post._doc;
       let author = users.filter((user) => user._id == postData.author.id);
       postData.profilePicture = author[0]?.profilePicture.toString("base64");
       return postData;
@@ -78,7 +78,7 @@ router.get("/:postId", async (req, res) => {
     const post = await Post.findById(req.params.postId);
     const users = await User.find();
 
-    const { comments, ...postData } = post._doc;
+    const { comments, __v, ...postData } = post._doc;
     let author = users.filter((user) => user._id == postData.author.id);
     postData.profilePicture = author[0]?.profilePicture.toString("base64");
 

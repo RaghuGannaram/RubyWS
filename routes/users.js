@@ -19,7 +19,9 @@ router.get("/all", async (req, res) => {
   try {
     const users = await User.find();
     const usersWithPublicData = users.map((user) => {
-      const { adminStatus, password, updatedAt, ...remainingData } = user._doc;
+      const { adminStatus, password, createdAt, updatedAt, __v, ...remainingData } = user._doc;
+      let imgBase64encoded = remainingData.profilePicture.toString("base64")
+      remainingData.profilePicture = imgBase64encoded;
       return remainingData;
     });
     res.status(200).json(usersWithPublicData);
@@ -32,7 +34,7 @@ router.get("/all", async (req, res) => {
 router.get("/:userId", async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
-    const { adminStatus, password, updatedAt, ...remainingData } = user._doc;
+    const {adminStatus, password, createdAt, updatedAt, __v, ...remainingData } = user._doc;
     let imgBase64encoded = remainingData.profilePicture.toString("base64")
     remainingData.profilePicture = imgBase64encoded;
     res.status(200).json(remainingData);
