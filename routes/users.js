@@ -19,9 +19,11 @@ router.get("/all", async (req, res) => {
   try {
     const users = await User.find();
     const usersWithPublicData = users.map((user) => {
-      const { adminStatus, password, createdAt, updatedAt, __v, ...remainingData } = user._doc;
-      let imgBase64encoded = remainingData.profilePicture.toString("base64")
-      remainingData.profilePicture = imgBase64encoded;
+      const { adminStatus, password, updatedAt, __v, ...remainingData } = user._doc;
+      if (remainingData.profilePicture) {
+        let imgBase64encoded = remainingData.profilePicture.toString("base64");
+        remainingData.profilePicture = imgBase64encoded;
+      }
       return remainingData;
     });
     res.status(200).json(usersWithPublicData);
@@ -34,9 +36,11 @@ router.get("/all", async (req, res) => {
 router.get("/:userId", async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
-    const {adminStatus, password, createdAt, updatedAt, __v, ...remainingData } = user._doc;
-    let imgBase64encoded = remainingData.profilePicture.toString("base64")
-    remainingData.profilePicture = imgBase64encoded;
+    const {adminStatus, password, updatedAt, __v, ...remainingData } = user._doc;
+    if (remainingData.profilePicture) {
+      let imgBase64encoded = remainingData.profilePicture.toString("base64");
+      remainingData.profilePicture = imgBase64encoded;
+    }
     res.status(200).json(remainingData);
   } catch (err) {
     res.status(500).json(err);
@@ -55,6 +59,7 @@ router.put("/:userId", upload.single("profilePicture"), async (req, res) => {
 
       if (req.file) {
         userData.profilePicture = fs.readFileSync(path.join(__dirname, "../uploads", req.file.filename));
+        console.log("req.file", req.file)
       }
       
       await User.findByIdAndUpdate(req.params.userId, {
