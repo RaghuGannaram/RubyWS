@@ -8,25 +8,31 @@ router.post("/register", async (req, res) => {
   try {
     const salt = await bcrypt.genSalt(5);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
-    const photo = await fs.readFileSync(
-      path.join(__dirname, "../uploads", "defaultProfilePicture.jpg")
+    const profile = fs.readFileSync(
+      path.join(__dirname, "../uploads", "profile.png")
     );
-
+    const background = fs.readFileSync(
+      path.join(__dirname, "../uploads", "background.jpg")
+    );
     const newUser = new User({
       username: req.body.username,
       email: req.body.email,
       password: hashedPassword,
       handle: req.body.handle,
-      profilePicture: photo,
+      profilePicture: profile,
+      backgroundImage: background,
     });
 
     const user = await newUser.save();
-    const { adminStatus, password, updatedAt, __v, ...remainingData } =
-      user._doc;
-    let imgBase64encoded = remainingData.profilePicture.toString("base64");
-    remainingData.profilePicture = imgBase64encoded;
+    const { adminStatus, password, updatedAt, __v, ...remainingData } = user._doc;
+    remainingData.profilePicture = remainingData.profilePicture.toString("base64");
+    remainingData.backgroundImage = remainingData.backgroundImage.toString("base64");
+    
     res.status(200).json(remainingData);
   } catch (err) {
+    if(err.name==="MongoError"){
+      Object.keys(err.keyValue)
+    }
     res.status(500).json(err);
   }
 });
@@ -39,12 +45,9 @@ router.post("/login", async (req, res) => {
     const userPassword = user.password;
     const isValidPass = await bcrypt.compare(req.body.password, userPassword);
     if (!isValidPass) return res.status(400).send("Wrong Password");
-    const { adminStatus, password, updatedAt, __v, ...remainingData } =
-      user._doc;
-    if (remainingData.profilePicture) {
-      let imgBase64encoded = remainingData.profilePicture.toString("base64");
-      remainingData.profilePicture = imgBase64encoded;
-    }
+    const { adminStatus, password, updatedAt, __v, ...remainingData } = user._doc;
+    remainingData.profilePicture = remainingData.profilePicture.toString("base64");
+    remainingData.backgroundImage = remainingData.backgroundImage.toString("base64");
     res.status(200).json(remainingData);
   } catch (err) {
     res.status(500).json(err);

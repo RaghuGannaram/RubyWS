@@ -9,7 +9,7 @@ router.get("/all", async (req, res) => {
     const users = await User.find();
 
     const postList = posts.map((post) => {
-      const { comments, __v,  ...postData } = post._doc;
+      const { comments, __v, ...postData } = post._doc;
       let author = users.filter((user) => user._id == postData.author.id);
       postData.profilePicture = author[0]?.profilePicture.toString("base64");
       return postData;
@@ -24,30 +24,24 @@ router.get("/all", async (req, res) => {
 //get timeline posts
 router.get("/timeline/:userId", async (req, res) => {
   try {
-    console.log("first");
     const currentUser = await User.findById(req.params.userId);
-    console.log("second");
     const userPosts = await Post.find({ "author.id": currentUser._id });
-    console.log("third");
     const friendPosts = await Promise.all(
       currentUser?.followings?.map((friendId) => {
         return Post.find({ "author.id": friendId });
       })
     );
 
-    console.log("fourth");
     const allPosts = userPosts.concat(...friendPosts);
 
     const users = await User.find();
 
-    console.log("fifth");
     const postList = allPosts.map((post) => {
       const { comments, __v, ...postData } = post._doc;
       let author = users.filter((user) => user._id == postData.author.id);
       postData.profilePicture = author[0]?.profilePicture.toString("base64");
       return postData;
     });
-    console.log("sixth");
     res.status(200).json(postList);
   } catch (err) {
     res.status(500).json(err);
@@ -103,7 +97,13 @@ router.post("/new", async (req, res) => {
   const newPost = new Post(req.body);
   try {
     const savedPost = await newPost.save();
-    res.status(200).json(savedPost);
+    const author = await User.findById(req.body.author.id);
+
+    const { profilePicture } = author._doc;
+    const { comments, __v, ...postData } = savedPost._doc;
+    
+    postData.profilePicture = profilePicture.toString("base64");
+    res.status(200).json(postData);
   } catch (err) {
     res.status(500).json(err);
   }

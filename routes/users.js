@@ -20,10 +20,8 @@ router.get("/all", async (req, res) => {
     const users = await User.find();
     const usersWithPublicData = users.map((user) => {
       const { adminStatus, password, updatedAt, __v, ...remainingData } = user._doc;
-      if (remainingData.profilePicture) {
-        let imgBase64encoded = remainingData.profilePicture.toString("base64");
-        remainingData.profilePicture = imgBase64encoded;
-      }
+      remainingData.profilePicture = remainingData.profilePicture.toString("base64");
+      remainingData.backgroundImage = remainingData.backgroundImage.toString("base64");
       return remainingData;
     });
     res.status(200).json(usersWithPublicData);
@@ -37,10 +35,8 @@ router.get("/:userId", async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
     const {adminStatus, password, updatedAt, __v, ...remainingData } = user._doc;
-    if (remainingData.profilePicture) {
-      let imgBase64encoded = remainingData.profilePicture.toString("base64");
-      remainingData.profilePicture = imgBase64encoded;
-    }
+    remainingData.profilePicture = remainingData.profilePicture.toString("base64");
+    remainingData.backgroundImage = remainingData.backgroundImage.toString("base64");
     res.status(200).json(remainingData);
   } catch (err) {
     res.status(500).json(err);
@@ -52,20 +48,36 @@ router.put("/:userId", upload.single("profilePicture"), async (req, res) => {
   try {
     if (req.body.userId === req.params.userId || req.body.isAdmin) {
       let { userId, ...userData } = req.body;
-
-      Object.keys(userData).forEach(
-        (key) => userData[key] === "undefined" && delete userData[key]
-      );
+      Object.keys(userData).forEach( (key) => userData[key] === "undefined" && delete userData[key]);
 
       if (req.file) {
         userData.profilePicture = fs.readFileSync(path.join(__dirname, "../uploads", req.file.filename));
-        console.log("req.file", req.file)
       }
       
       await User.findByIdAndUpdate(req.params.userId, {
         $set: { ...userData },
       });
       res.status(200).json("Account has been updated");
+    } else {
+      return res.status(403).json("You can update only your account!");
+    }
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+});
+
+//update backgroundImage
+router.put("/:userId/backgroundImage", upload.single("backgroundImage"), async (req, res) => {
+  try {
+    if (req.body.userId === req.params.userId || req.body.isAdmin) {
+      let { userId, ...userData } = req.body;
+
+      if (req.file) { userData.backgroundImage = fs.readFileSync(path.join(__dirname, "../uploads", req.file.filename));}
+      
+      await User.findByIdAndUpdate(req.params.userId, {
+        $set: { ...userData },
+      });
+      res.status(200).json("backgroundImage has been updated");
     } else {
       return res.status(403).json("You can update only your account!");
     }
